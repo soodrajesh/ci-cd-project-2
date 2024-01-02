@@ -95,7 +95,7 @@ pipeline {
                         sh 'mkdir -p reports'
                         
                         // Generate Terraform Plan in JSON format
-                        sh 'terraform plan -out=tf.plan'
+                        sh 'terraform plan -out=tf.plan -lock=false'
                         sh 'terraform show -json tf.plan > tf.json'
                         
                         // Run Checkov on the JSON file
