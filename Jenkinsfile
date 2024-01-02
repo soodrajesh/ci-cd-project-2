@@ -10,7 +10,8 @@ pipeline {
         PROD_TF_WORKSPACE = 'production'
         SLACK_CHANNEL = 'jenkins-alerts'
     }
-
+    
+    stages {
         stage('Setup Python Virtual Environment') {
             steps {
                 script {
