@@ -9,25 +9,28 @@ pipeline {
         DEV_TF_WORKSPACE = 'development'
         PROD_TF_WORKSPACE = 'production'
         SLACK_CHANNEL = 'jenkins-alerts'
+        PYENV_ROOT = "${WORKSPACE}/.pyenv"
+        PATH = "${PYENV_ROOT}/shims:${PATH}"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Install pyenv') {
             steps {
-                echo 'Checking out code...'
-                checkout scm
+                script {
+                    sh 'curl https://pyenv.run | bash'
+                    sh 'eval "$(pyenv init --path)"'
+                }
             }
         }
 
         stage('Setup Python Virtual Environment') {
             steps {
                 script {
-                    // Create and activate virtual environment
-                    sh 'python3.7 -m venv myenv'
+                    sh 'pyenv install 3.7.9'
+                    sh 'pyenv global 3.7.9'
+                    sh 'python -m venv myenv'
                     sh 'source myenv/bin/activate'
-                    
-                    // Install Checkov in the virtual environment
-                    sh 'pip3 install checkov'
+                    sh 'pip install checkov'
                 }
             }
         }
