@@ -11,13 +11,16 @@ pipeline {
         SLACK_CHANNEL = 'jenkins-alerts'
         PYENV_ROOT = "${WORKSPACE}/.pyenv"
         PATH = "${PYENV_ROOT}/shims:${PATH}"
+        PIPENV_HOME = "${HOME}/.local/share/virtualenvs"
+        PATH = "${PIENV_HOME}/bin:${PATH}"
     }
+
+    stages {
 
     stages {
         stage('Install pyenv') {
             steps {
                 script {
-                    sh 'rm -rf ${PYENV_ROOT}'  // Remove existing pyenv installation
                     sh 'curl https://pyenv.run | bash'
                     sh 'eval "$(pyenv init --path)"'
                     sh 'eval "$(pyenv virtualenv-init -)"'
@@ -25,17 +28,25 @@ pipeline {
             }
         }
 
-        stage('Setup Python Virtual Environment') {
+        stage('Install pipenv') {
             steps {
                 script {
                     sh 'pyenv install 3.7.9'
                     sh 'pyenv global 3.7.9'
-                    sh 'python -m venv myenv'
-                    sh 'source myenv/bin/activate'
-                    sh 'pip install checkov'
+                    sh 'pip install --upgrade pip'
+                    sh 'pip install pipenv'
                 }
             }
         }
+
+        stage('Setup Python Virtual Environment') {
+            steps {
+                script {
+                    sh 'pipenv install checkov'
+                }
+            }
+        }
+
 
         stage('Terraform Init') {
             steps {
