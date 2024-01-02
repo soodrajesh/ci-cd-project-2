@@ -12,7 +12,7 @@ pipeline {
         PYENV_ROOT = "${WORKSPACE}/.pyenv"
         PATH = "${PYENV_ROOT}/shims:${PATH}"
         PIPENV_HOME = "${HOME}/.local/share/virtualenvs"
-        PATH = "${PIENV_HOME}/bin:${PATH}"
+        PIPENV_PATH = "${PIENV_HOME}/bin:${PATH}"
     }
 
 
