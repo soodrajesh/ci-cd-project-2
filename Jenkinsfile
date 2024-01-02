@@ -27,7 +27,7 @@ pipeline {
                     sh 'source myenv/bin/activate'
                     
                     // Install Checkov in the virtual environment
-                    sh 'sudo pip3 install checkov'
+                    sh 'pip3 install checkov'
                 }
             }
         }
