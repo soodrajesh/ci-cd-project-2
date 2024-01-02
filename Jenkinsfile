@@ -19,64 +19,12 @@ pipeline {
             }
         }
 
-        stage('Setup Python Virtual Environment') {
-            steps {
-                script {
-                    // Create and activate virtual environment
-                    sh 'python3.7 -m venv myenv'
-                    sh 'source myenv/bin/activate'
-                    
-                    // Install Checkov in the virtual environment
-                    sh 'pip install checkov'
-                }
-            }
-        }
 
         stage('Terraform Init') {
             steps {
                 script {
                     // Answer "yes" to the state migration prompt during init
                     sh 'echo "yes" | terraform init'
-                }
-            }
-        }
-
-        stage('Terraform Select Workspace') {
-            steps {
-                script {
-                    def terraformWorkspace
-                    def awsCredentialsId
-
-                    if (env.BRANCH_NAME == 'main') {
-                        terraformWorkspace = PROD_TF_WORKSPACE
-                        awsCredentialsId = 'aws-prod-user'
-                    } else {
-                        terraformWorkspace = DEV_TF_WORKSPACE
-                        awsCredentialsId = 'aws-dev-user'
-                    }
-
-                    def awsAccessKeyId
-
-                    // Retrieve AWS credentials from Jenkins
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCredentialsId, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                        awsAccessKeyId = env.AWS_ACCESS_KEY_ID
-                    }
-
-                    echo "Using AWS credentials:"
-                    echo "Credentials ID: ${awsCredentialsId}"
-
-                    // Check if the Terraform workspace exists
-                    def workspaceExists = sh(script: "terraform workspace list | grep -q ${terraformWorkspace}", returnStatus: true)
-
-                    if (workspaceExists == 0) {
-                        echo "Terraform workspace '${terraformWorkspace}' exists."
-                    } else {
-                        echo "Terraform workspace '${terraformWorkspace}' doesn't exist. Creating..."
-                        sh "terraform workspace new ${terraformWorkspace}"
-                    }
-
-                    // Set the Terraform workspace
-                    sh "terraform workspace select ${terraformWorkspace}"
                 }
             }
         }
@@ -90,11 +38,20 @@ pipeline {
             }
         }
 
+        stage('Generate Terraform Plan JSON') {
+            steps {
+                script {
+                    // Generate JSON representation of Terraform plan
+                    sh 'terraform show -json tfplan > tf.json'
+                }
+            }
+        }
+
         stage('Checkov Scan') {
             steps {
                 script {
-                    // Run Checkov with the skip-check option from a file
-                    sh 'checkov -d /path/to/your/code --skip-check $(< skip_checks.txt)'
+                    // Activate the virtual environment and run Checkov
+                    sh 'source myenv/bin/activate && checkov -f tf.json'
                 }
             }
         }
