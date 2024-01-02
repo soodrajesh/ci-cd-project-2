@@ -81,8 +81,10 @@ pipeline {
 
         stage('checkov scan ') {
             steps {
-                catchError(buildResult: 'SUCCESS') {
-                    script {
+                script {
+                    def workspacePath = pwd()
+                    echo "Workspace Path: ${workspacePath}"
+                    catchError(buildResult: 'SUCCESS') {
                         try {
                             sh 'mkdir -p reports'
                             sh 'checkov -d . --output junitxml > reports/checkov-report.xml'
@@ -90,12 +92,12 @@ pipeline {
                         } catch (err) {
                             junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
                             throw err
-                        }
-                        
+                        }                        
                     }
                 }
             }
         }
+
 
         stage('Terraform Plan') {
             steps {
