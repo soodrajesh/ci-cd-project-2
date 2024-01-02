@@ -15,7 +15,6 @@ pipeline {
         PATH = "${PIENV_HOME}/bin:${PATH}"
     }
 
-    stages {
 
     stages {
         stage('Install pyenv') {
