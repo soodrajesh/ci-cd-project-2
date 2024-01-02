@@ -17,6 +17,7 @@ pipeline {
         stage('Install pyenv') {
             steps {
                 script {
+                    sh 'rm -rf ${PYENV_ROOT}'  // Remove existing pyenv installation
                     sh 'curl https://pyenv.run | bash'
                     sh 'eval "$(pyenv init --path)"'
                     sh 'eval "$(pyenv virtualenv-init -)"'
