@@ -83,13 +83,13 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS') {
                     script {
-                        // Get the absolute path to the Checkov executable
-                        def checkovPath = sh(script: 'pip3 show checkov | grep "Location" | cut -d " " -f 2', returnStdout: true).trim()
+                        // Use 'which' command to get the absolute path of checkov
+                        def checkovPath = sh(script: 'which checkov', returnStdout: true).trim()
 
                         try {
                             sh 'mkdir -p reports'
                             // Use the absolute path to the Checkov executable
-                            sh "${checkovPath}/checkov -d . --output junitxml > reports/checkov-report.xml"
+                            sh "${checkovPath} -d . --output junitxml > reports/checkov-report.xml"
                             
                             // Display the content of the report in the Jenkins console
                             echo "Checkov Report Contents:"
@@ -104,6 +104,7 @@ pipeline {
                 }
             }
         }
+
 
 
 
