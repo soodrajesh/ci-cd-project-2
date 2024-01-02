@@ -81,13 +81,16 @@ pipeline {
 
         stage('checkov scan ') {
             steps {
-                script {
-                    def workspacePath = pwd()
-                    echo "Workspace Path: ${workspacePath}"
-                    catchError(buildResult: 'SUCCESS') {
+                catchError(buildResult: 'SUCCESS') {
+                    script {
                         try {
                             sh 'mkdir -p reports'
                             sh 'checkov -d . --output junitxml > reports/checkov-report.xml'
+                            
+                            // Display the content of the report in the Jenkins console
+                            echo "Checkov Report Contents:"
+                            sh 'cat reports/checkov-report.xml'
+                            
                             junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
                         } catch (err) {
                             junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
@@ -97,6 +100,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Terraform Plan') {
             steps {
