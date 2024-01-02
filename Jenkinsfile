@@ -83,6 +83,9 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS') {
                     script {
+                        // Define the Checkov executable path
+                        def checkovPath = sh(script: 'pip3 show checkov | grep "Location" | cut -d " " -f 2', returnStdout: true).trim()
+
                         try {
                             sh 'mkdir -p reports'
                             // Use the absolute path to the Checkov executable
@@ -101,6 +104,7 @@ pipeline {
                 }
             }
         }
+
 
 
 
