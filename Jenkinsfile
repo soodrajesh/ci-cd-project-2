@@ -90,6 +90,7 @@ pipeline {
 
         stage('Checkov Scan') {
             steps {
+                echo "Workspace Path: ${WORKSPACE}"
                 catchError(buildResult: 'SUCCESS') {
                     script {
                         // Create the 'reports' directory
