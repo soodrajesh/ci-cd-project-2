@@ -107,7 +107,6 @@ pipeline {
 
 
 
-
         stage('Terraform Plan') {
             steps {
                 script {
