@@ -83,7 +83,7 @@ pipeline {
             steps {
                 script {
                     // Additional steps if needed
-                    sh 'terraform plan -out=tfplan'
+                    sh 'terraform plan -out=tfplan -lock=false'
                 }
             }
         }
