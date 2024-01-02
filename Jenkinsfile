@@ -84,8 +84,8 @@ pipeline {
                 catchError(buildResult: 'SUCCESS') {
                     script {
                         try {
-                            sh 'sudo mkdir -p reports'
-                            sh 'sudo checkov -d . --output junitxml > reports/checkov-report.xml'
+                            sh 'mkdir -p reports'
+                            sh 'checkov -d . --output junitxml > reports/checkov-report.xml'
                             junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
                         } catch (err) {
                             junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
