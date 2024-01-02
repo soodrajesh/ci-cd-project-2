@@ -9,34 +9,7 @@ pipeline {
         DEV_TF_WORKSPACE = 'development'
         PROD_TF_WORKSPACE = 'production'
         SLACK_CHANNEL = 'jenkins-alerts'
-        PYENV_ROOT = "${WORKSPACE}/.pyenv"
-        PATH = "${PYENV_ROOT}/shims:${PATH}"
-        PIPENV_HOME = "${HOME}/.local/share/virtualenvs"
-        PIPENV_PATH = "${PIENV_HOME}/bin:${PATH}"
     }
-
-
-    stages {
-        stage('Install pyenv') {
-            steps {
-                script {
-                    sh 'curl https://pyenv.run | bash'
-                    sh 'eval "$(pyenv init --path)"'
-                    sh 'eval "$(pyenv virtualenv-init -)"'
-                }
-            }
-        }
-
-        stage('Install pipenv') {
-            steps {
-                script {
-                    sh 'pyenv install 3.7.9'
-                    sh 'pyenv global 3.7.9'
-                    sh 'pip install --upgrade pip'
-                    sh 'pip install pipenv'
-                }
-            }
-        }
 
         stage('Setup Python Virtual Environment') {
             steps {
