@@ -85,7 +85,8 @@ pipeline {
                     script {
                         try {
                             sh 'mkdir -p reports'
-                            sh 'checkov -d . --output junitxml > reports/checkov-report.xml'
+                            // Use the absolute path to the Checkov executable
+                            sh "${checkovPath}/checkov -d . --output junitxml > reports/checkov-report.xml"
                             
                             // Display the content of the report in the Jenkins console
                             echo "Checkov Report Contents:"
@@ -95,11 +96,12 @@ pipeline {
                         } catch (err) {
                             junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
                             throw err
-                        }                        
+                        }
                     }
                 }
             }
         }
+
 
 
         stage('Terraform Plan') {
