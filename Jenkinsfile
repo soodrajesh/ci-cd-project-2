@@ -79,17 +79,26 @@ pipeline {
             }
         }
 
-        stage('checkov scan ') {
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    // Additional steps if needed
+                    sh 'terraform plan -out=tfplan'
+                }
+            }
+        }
+
+        stage('checkov scan') {
             steps {
                 catchError(buildResult: 'SUCCESS') {
                     script {
-                        // Use 'which' command to get the absolute path of checkov
                         def checkovPath = sh(script: 'which checkov', returnStdout: true).trim()
 
                         try {
                             sh 'mkdir -p reports'
-                            // Use the absolute path to the Checkov executable
-                            sh "${checkovPath} -d . --output junitxml > reports/checkov-report.xml"
+                            
+                            // Run Checkov using the Terraform plan file as input
+                            sh "${checkovPath} -f tfplan --output junitxml > reports/checkov-report.xml"
                             
                             // Display the content of the report in the Jenkins console
                             echo "Checkov Report Contents:"
@@ -101,19 +110,6 @@ pipeline {
                             throw err
                         }
                     }
-                }
-            }
-        }
-
-
-
-
-
-        stage('Terraform Plan') {
-            steps {
-                script {
-                    // Additional steps if needed
-                    sh 'terraform plan -out=tfplan'
                 }
             }
         }
