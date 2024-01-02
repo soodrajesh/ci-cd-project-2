@@ -88,31 +88,30 @@ pipeline {
             }
         }
 
-        stage('checkov scan') {
+        stage('Checkov Scan') {
             steps {
                 catchError(buildResult: 'SUCCESS') {
                     script {
-                        def checkovPath = sh(script: 'which checkov', returnStdout: true).trim()
+                        sh 'mkdir -p reports'
+                        
+                        // Generate Terraform Plan in JSON format
+                        sh 'terraform plan -out=tf.plan'
+                        sh 'terraform show -json tf.plan > tf.json'
+                        
+                        // Run Checkov on the JSON file
+                        sh 'checkov -f tf.json --output junitxml > reports/checkov-report.xml'
 
-                        try {
-                            sh 'mkdir -p reports'
-                            
-                            // Run Checkov using the Terraform plan file as input
-                            sh "${checkovPath} -f tfplan --output junitxml > reports/checkov-report.xml"
-                            
-                            // Display the content of the report in the Jenkins console
-                            echo "Checkov Report Contents:"
-                            sh 'cat reports/checkov-report.xml'
-                            
-                            junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
-                        } catch (err) {
-                            junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
-                            throw err
-                        }
+                        // Display the content of the report in the Jenkins console
+                        echo "Checkov Report Contents:"
+                        sh 'cat reports/checkov-report.xml'
+
+                        // Archive JUnit-formatted test results
+                        junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
                     }
                 }
             }
         }
+
 
         stage('Manual Approval') {
             steps {
