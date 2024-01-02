@@ -92,14 +92,18 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS') {
                     script {
+                        // Create the 'reports' directory
                         sh 'mkdir -p reports'
-                        
+
                         // Generate Terraform Plan in JSON format
                         sh 'terraform plan -out=tf.plan -lock=false'
                         sh 'terraform show -json tf.plan > tf.json'
-                        
+
                         // Run Checkov on the JSON file
                         sh 'checkov -f tf.json --output junitxml > reports/checkov-report.xml'
+
+                        // Echo the directory where the reports are stored
+                        echo "Checkov Report Directory: ${WORKSPACE}/reports"
 
                         // Display the content of the report in the Jenkins console
                         echo "Checkov Report Contents:"
@@ -111,6 +115,7 @@ pipeline {
                 }
             }
         }
+
 
 
         stage('Manual Approval') {
