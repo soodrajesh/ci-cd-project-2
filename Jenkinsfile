@@ -23,7 +23,7 @@ pipeline {
         stage('Install Checkov') {
             steps {
                 script {
-                    sh "sudo pip install checkov"
+                    sh "pip install checkov"
                     def checkovPath = sh(script: 'pip show checkov | grep "Location" | cut -d " " -f 2', returnStdout: true).trim()
                     env.PATH = "${checkovPath}:${env.PATH}"
                 }
@@ -96,7 +96,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Terraform Plan') {
             steps {
                 script {
