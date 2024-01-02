@@ -19,6 +19,18 @@ pipeline {
             }
         }
 
+        stage('Setup Python Virtual Environment') {
+            steps {
+                script {
+                    // Create and activate virtual environment
+                    sh 'sudo python3.7 -m venv myenv'
+                    sh 'source myenv/bin/activate'
+                    
+                    // Install Checkov in the virtual environment
+                    sh 'sudo pip3 install checkov'
+                }
+            }
+        }
 
         stage('Terraform Init') {
             steps {
