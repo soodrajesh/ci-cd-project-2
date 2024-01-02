@@ -23,7 +23,7 @@ pipeline {
         stage('Install Checkov') {
             steps {
                 script {
-                    sh "pip install checkov"
+                    sh "pip3 install checkov"
                     def checkovPath = sh(script: 'pip show checkov | grep "Location" | cut -d " " -f 2', returnStdout: true).trim()
                     env.PATH = "${checkovPath}:${env.PATH}"
                 }
