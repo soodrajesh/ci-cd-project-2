@@ -15,6 +15,7 @@ pipeline {
         stage('Setup Python Virtual Environment') {
             steps {
                 script {
+                    sh 'pip3 install pipenv'
                     sh 'pipenv install checkov'
                 }
             }
