@@ -19,6 +19,7 @@ pipeline {
                 script {
                     sh 'curl https://pyenv.run | bash'
                     sh 'eval "$(pyenv init --path)"'
+                    sh 'eval "$(pyenv virtualenv-init -)"'
                 }
             }
         }
