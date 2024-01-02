@@ -19,6 +19,19 @@ pipeline {
             }
         }
 
+        stage('Setup Python Virtual Environment') {
+            steps {
+                script {
+                    // Create and activate virtual environment
+                    sh 'python3.7 -m venv myenv'
+                    sh 'source myenv/bin/activate'
+                    
+                    // Install Checkov in the virtual environment
+                    sh 'pip install checkov'
+                }
+            }
+        }
+
         stage('Terraform Init') {
             steps {
                 script {
@@ -81,7 +94,7 @@ pipeline {
             steps {
                 script {
                     // Run Checkov with the skip-check option from a file
-                    sh 'checkov -f tf.json --skip-check $(< skip_checks.txt)'
+                    sh 'checkov -d /path/to/your/code --skip-check $(< skip_checks.txt)'
                 }
             }
         }
