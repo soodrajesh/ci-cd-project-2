@@ -90,6 +90,7 @@ pipeline {
 
         stage('Checkov Scan') {
             steps {
+                echo "Workspace Path: ${WORKSPACE}"
                 catchError(buildResult: 'SUCCESS') {
                     script {
                         // Create the 'reports' directory
@@ -100,18 +101,22 @@ pipeline {
                         sh 'terraform show -json tf.plan > tf.json'
 
                         // Run Checkov on the JSON file
-                        sh 'checkov -f tf.json --output json > reports/checkov-report.json'
+                        sh 'checkov -f tf.json --output junitxml > reports/checkov-report.xml'
+
+                        // Echo the directory where the reports are stored
+                        echo "Checkov Report Directory: ${WORKSPACE}/reports"
 
                         // Display the content of the report in the Jenkins console
-                        echo "Checkov Report Contents (JSON):"
-                        sh 'cat reports/checkov-report.json'
+                        echo "Checkov Report Contents:"
+                        sh 'cat reports/checkov-report.xml'
 
-                        // Archive the JSON report
-                        archiveArtifacts 'reports/checkov-report.json'
+                        // Archive JUnit-formatted test results
+                        junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
                     }
                 }
             }
         }
+
 
 
 
