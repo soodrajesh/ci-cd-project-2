@@ -79,6 +79,28 @@ pipeline {
             }
         }
 
+
+        stage('checkov scan ') {
+            steps {
+                echo "Workspace Path: ${WORKSPACE}"
+                catchError(buildResult: 'SUCCESS') {
+                    script {
+                        try {
+                            sh 'sudo mkdir -p reports'
+                            sh 'sudo checkov -d . --output junitxml > reports/checkov-report.xml'
+                            junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
+                            // Echo the directory where the reports are stored
+                            echo "Checkov Report Directory: ${WORKSPACE}/reports"
+                        } catch (err) {
+                            junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
+                            throw err
+                        }
+                        
+                    }
+                }
+            }
+        }
+
         stage('Terraform Plan') {
             steps {
                 script {
@@ -87,39 +109,7 @@ pipeline {
                 }
             }
         }
-
-        stage('Checkov Scan') {
-            steps {
-                echo "Workspace Path: ${WORKSPACE}"
-                catchError(buildResult: 'SUCCESS') {
-                    script {
-                        // Create the 'reports' directory
-                        sh 'mkdir -p reports'
-
-                        // Generate Terraform Plan in JSON format
-                        sh 'terraform plan -out=tf.plan -lock=false'
-                        sh 'terraform show -json tf.plan > tf.json'
-
-                        // Run Checkov on the JSON file
-                        sh 'checkov -f tf.json --output junitxml > reports/checkov-report.xml'
-
-                        // Echo the directory where the reports are stored
-                        echo "Checkov Report Directory: ${WORKSPACE}/reports"
-
-                        // Display the content of the report in the Jenkins console
-                        echo "Checkov Report Contents:"
-                        sh 'cat reports/checkov-report.xml'
-
-                        // Archive JUnit-formatted test results
-                        junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
-                    }
-                }
-            }
-        }
-
-
-
-
+ 
         stage('Manual Approval') {
             steps {
                 script {
