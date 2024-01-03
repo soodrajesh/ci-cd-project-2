@@ -86,7 +86,7 @@ pipeline {
                 catchError(buildResult: 'SUCCESS') {
                     script {
                         // Run a basic Checkov scan on the code
-                        sh 'checkov -d .'
+                        sh 'checkov -d . --quiet --compact'
                     }
                 }
             }
