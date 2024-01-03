@@ -79,14 +79,28 @@ pipeline {
             }
         }
 
+
         stage('Checkov Scan') {
             steps {
                 echo "Workspace Path: ${WORKSPACE}"
                 echo "Running Checkov Scan"
                 catchError(buildResult: 'SUCCESS') {
                     script {
-                        // Run a basic Checkov scan on the code
-                        sh 'checkov -d . --quiet --compact'
+                        // Run Checkov scan and capture the output
+                        def checkovOutput = sh(script: 'checkov -d .  --quiet --compact --output json', returnStdout: true).trim()
+
+                        // Parse JSON output to check for failed entries
+                        def jsonOutput = readJSON text: checkovOutput
+                        def failedChecks = jsonOutput?.results?.filter { it?.check_id == 'FAILED' }
+
+                        // Change the color of the stage based on the presence of failed entries
+                        if (failedChecks) {
+                            currentBuild.result = 'UNSTABLE'
+                        }
+
+                        // Print the output to the Jenkins console
+                        echo "Checkov Scan Output:"
+                        echo checkovOutput
                     }
                 }
             }
