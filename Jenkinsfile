@@ -87,11 +87,10 @@ pipeline {
                 catchError(buildResult: 'SUCCESS') {
                     script {
                         // Run Checkov scan and capture the output
-                        def checkovOutput = sh(script: 'checkov -d .  --quiet --compact --output json', returnStdout: true).trim()
+                        def checkovOutput = sh(script: 'checkov -d . --quiet --compact', returnStdout: true).trim()
 
-                        // Parse JSON output to check for failed entries
-                        def jsonOutput = readJSON text: checkovOutput
-                        def failedChecks = jsonOutput?.results?.filter { it?.check_id == 'FAILED' }
+                        // Check for failed entries in the output
+                        def failedChecks = checkovOutput.contains('FAILED for resource:')
 
                         // Change the color of the stage based on the presence of failed entries
                         if (failedChecks) {
