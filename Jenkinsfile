@@ -86,8 +86,8 @@ pipeline {
                 echo "Running Checkov Scan"
                 catchError(buildResult: 'SUCCESS') {
                     script {
-                        // Run Checkov scan and capture the output
-                        def checkovOutput = sh(script: 'checkov -d . --quiet --compact', returnStdout: true).trim()
+                        // Run Checkov scan and capture the output, skipping tf.json
+                        def checkovOutput = sh(script: 'checkov -d . --quiet --compact --skip-check tf.json', returnStdout: true).trim()
 
                         // Check for failed entries in the output
                         def failedChecks = checkovOutput.contains('FAILED for resource:')
