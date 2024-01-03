@@ -79,27 +79,19 @@ pipeline {
             }
         }
 
-
-        stage('checkov scan ') {
+        stage('Checkov Scan') {
             steps {
                 echo "Workspace Path: ${WORKSPACE}"
+                echo "Running Checkov Scan"
                 catchError(buildResult: 'SUCCESS') {
                     script {
-                        try {
-                            sh 'mkdir -p reports'
-                            sh 'checkov -d . --output junitxml > reports/checkov-report.xml'
-                            junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
-                            // Echo the directory where the reports are stored
-                            echo "Checkov Report Directory: ${WORKSPACE}/reports"
-                        } catch (err) {
-                            junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
-                            throw err
-                        }
-                        
+                        // Run a basic Checkov scan on the code
+                        sh 'checkov -d .'
                     }
                 }
             }
         }
+
 
         stage('Terraform Plan') {
             steps {
