@@ -86,8 +86,8 @@ pipeline {
                 catchError(buildResult: 'SUCCESS') {
                     script {
                         try {
-                            sh 'sudo mkdir -p reports'
-                            sh 'sudo checkov -d . --output junitxml > reports/checkov-report.xml'
+                            sh 'mkdir -p reports'
+                            sh 'checkov -d . --output junitxml > reports/checkov-report.xml'
                             junit skipPublishingChecks: true, testResults: 'reports/checkov-report.xml'
                             // Echo the directory where the reports are stored
                             echo "Checkov Report Directory: ${WORKSPACE}/reports"
