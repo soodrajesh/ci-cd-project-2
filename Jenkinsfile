@@ -80,18 +80,35 @@ pipeline {
         }
 
 
-            stage('install'){
-                sh 'npm install' // Dependency Installation stage
+        stage('Install') {
+            steps {
+                script {
+                    sh 'npm install' // Dependency Installation stage
+                }
             }
-            stage('Scan') {
-                snykSecurity organisation: 'soodrajesh', projectName: 'ci-cd-project-2', severity: 'medium', snykInstallation: 'Snyk', snykTokenId: '7f4eb460-59be-451c-a835-2bcca89ef9f5', targetFile: ''
+        }
+
+        stage('Scan') {
+            steps {
+                script {
+                    snykSecurity organisation: 'soodrajesh', projectName: 'ci-cd-project-2', severity: 'medium', snykInstallation: 'Snyk', snykTokenId: '7f4eb460-59be-451c-a835-2bcca89ef9f5', targetFile: ''
+                }
             }
-            stage('Build') {
+        }
+
+        stage('Build') {
+            steps {
                 echo "Build"
+                // Add your build commands here
             }
-            stage('Results') {
+        }
+
+        stage('Results') {
+            steps {
                 echo "Test Result"
+                // Add any post-build actions or result reporting here
             }
+        }
         
 
         // stage('Snyk Scan') {
