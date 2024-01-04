@@ -20,7 +20,6 @@ pipeline {
             }
         }
 
-
         stage('Install Checkov') {
             steps {
                 script {
@@ -30,7 +29,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Terraform Init') {
             steps {
@@ -81,14 +79,11 @@ pipeline {
             }
         }
 
-
-
         stage('Snyk Test') {
             steps {
                 echo 'Testing...'
                 script {
-                    snykSecurity snykInstallation: 'Snyk'
-                    // Add other parameters here
+                    // Your Snyk test steps here
                 }
             }
         }
@@ -103,13 +98,14 @@ pipeline {
                     // Set Snyk API token as 'snykTokenId' for the duration of this stage
                     withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
                         env.SNYK_TOKEN = snykApiToken
-                        snykSecurity snykInstallation: 'Snyk'
-                        // Add other parameters here
+                        // Your Snyk scan steps here
                     }
                 }
             }
         }
-        
+    
+
+
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_TOKEN')]) {
