@@ -31,13 +31,6 @@ pipeline {
             }
         }
 
-        stage('Snyk Security Scan') {
-            steps {
-                withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
-                    sh 'snyk test --all-projects --org=your-organisation --severity-threshold=high --json --$SNYK_API_TOKEN'
-                }
-            }
-        }
 
         stage('Terraform Init') {
             steps {
@@ -84,6 +77,14 @@ pipeline {
 
                     // Set the Terraform workspace
                     sh "terraform workspace select ${terraformWorkspace}"
+                }
+            }
+        }
+
+        stage('Snyk Security Scan') {
+            steps {
+                withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
+                    sh "snyk test --all-projects --org=your-organisation --severity-threshold=high --json --api-token=${SNYK_API_TOKEN}"
                 }
             }
         }
