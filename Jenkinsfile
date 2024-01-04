@@ -80,27 +80,20 @@ pipeline {
         }
 
 
-        stage('Snyk Scanning') {
+        stage('Snyk Scan') {
             steps {
                 script {
-                    echo 'Snyk scanning...'
+                    // Get the Git repository name dynamically
+                    def gitRepoName = sh(script: 'basename `git rev-parse --show-toplevel`', returnStdout: true).trim()
 
-                    // Get the current workspace directory
-                    def workspaceDir = pwd()
-
-                    // Run Snyk security testing in the project directory
-                    dir(workspaceDir) {
-                        // Print current working directory and list files for debugging
-                        sh 'pwd'
-                        sh 'ls -al'
-
-                        // Run Snyk security testing
-                        snykSecurity(
-                            snykInstallation: 'Snyk',
-                            snykTokenId: 'snyk-token',
-                            // place other parameters here
-                        )
-                    }
+                    // Use Snyk Jenkins plugin to scan the project
+                    snykSecurity(
+                        additionalArguments: '',
+                        failOnIssues: true,
+                        projectName: gitRepoName,
+                        targetFile: '**/*.tf',
+                        // Add other parameters as needed
+                    )
                 }
             }
         }
