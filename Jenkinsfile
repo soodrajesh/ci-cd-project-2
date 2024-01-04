@@ -93,7 +93,6 @@ pipeline {
                         additionalArguments: '',
                         failOnIssues: true,
                         projectName: gitRepoName,
-                        targetFile: '**/*.tf'
                     )
                 }
             }
