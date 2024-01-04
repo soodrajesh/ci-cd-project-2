@@ -81,15 +81,13 @@ pipeline {
 
 
         stage('Snyk Security Scan') {
-            environment {
-                SNYK_HOME = tool 'Snyk'
-            }
             steps {
-                withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
-                    sh "${SNYK_HOME}/snyk test --all-projects --json"
+                withCredentials([usernamePassword(credentialsId: 'snyk', usernameVariable: 'SNYK_USERNAME', passwordVariable: 'SNYK_API_TOKEN')]) {
+                    sh "snyk test --all-projects --json"
                 }
             }
         }
+
 
         // stage('Scan') {
         //     steps {
