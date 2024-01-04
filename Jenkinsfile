@@ -79,6 +79,15 @@ pipeline {
             }
         }
 
+        stage('Test') {
+            steps {
+                echo 'Testing...'
+                snykSecurity snykInstallation: 'Snyk'
+                // Add other parameters here
+            }
+        }
+
+
         stage('Snyk Scan') {
             steps {
                 echo 'Running Snyk...'
