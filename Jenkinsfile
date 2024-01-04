@@ -79,6 +79,14 @@ pipeline {
             }
         }
 
+        stage('Authenticate Snyk') {
+            steps {
+                script {
+                    sh 'snyk auth'
+                }
+            }
+        }
+
 
         stage('Snyk Security Scan') {
             steps {
