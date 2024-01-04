@@ -87,29 +87,21 @@ pipeline {
         }
         stage('Snyk Test') {
             steps {
+                echo 'Testing...'
                 script {
-                    echo 'Testing...'
+                    // Print current working directory and list files for debugging
+                    sh 'pwd'
+                    sh 'ls -al'
 
-                    // Get the current workspace directory
-                    def workspaceDir = pwd()
+                    // Find all .tf files and store them in a variable
+                    def terraformFiles = sh(script: 'find . -name "*.tf"', returnStdout: true).trim()
 
-                    // Run Snyk security testing in the project directory
-                    dir(workspaceDir) {
-                        // Print current working directory and list files for debugging
-                        sh 'pwd'
-                        sh 'ls -al'
-
-                        // Run Snyk security testing
-                        snykSecurity(
-                            snykInstallation: 'Snyk',
-                            snykTokenId: 'snyk-token',
-                            targetFile: '*.tf', // Specify the pattern for .tf files
-                            // place other parameters here
-                        )
-                    }
+                    // Run Snyk security testing with explicit target file(s) filter
+                    sh "/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux test --json --severity-threshold=low --file=${terraformFiles}"
                 }
             }
         }
+
 
         stage('Deploy') {
         steps {
