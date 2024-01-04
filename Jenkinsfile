@@ -10,6 +10,7 @@ pipeline {
         PROD_TF_WORKSPACE = 'production'
         SLACK_CHANNEL = 'jenkins-alerts'
         SONARQUBE_SCANNER_HOME = tool 'SonarQube'
+        SNYK_TOKEN = credentials('snyk-token')
     }
 
     stages {
