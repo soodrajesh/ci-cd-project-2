@@ -80,52 +80,44 @@ pipeline {
         }
 
 
+            stage('install'){
+                sh 'npm install' // Dependency Installation stage
+            }
+            stage('Scan') {
+                snykSecurity organisation: 'soodrajesh', projectName: 'ci-cd-project-2', severity: 'medium', snykInstallation: 'Snyk', snykTokenId: '7f4eb460-59be-451c-a835-2bcca89ef9f5', targetFile: ''
+            }
+            stage('Build') {
+                echo "Build"
+            }
+            stage('Results') {
+                echo "Test Result"
+            }
+        
+
         // stage('Snyk Scan') {
         //     steps {
         //         script {
         //             // Get the Git repository name dynamically
         //             def gitRepoName = sh(script: 'basename `git rev-parse --show-toplevel`', returnStdout: true).trim()
 
-        //             // Use Snyk Jenkins plugin to scan the project
-        //             snykSecurity(
-        //                 snykInstallation: 'Snyk',
-        //                 snykTokenId: 'snyk-token',
-        //                 additionalArguments: '',
-        //                 failOnIssues: true,
-        //                 projectName: gitRepoName,
-        //             )
+
+        //                 // Run Snyk scan with --all-projects argument
+        //                 sh "snyk auth $snykTokenId"
+        //                 sh "snyk test || true"
+        //                 sh "snyk code test"
+
+        //                 // Use Snyk Jenkins plugin to scan the project
+        //                 snykSecurity(
+        //                     snykInstallation: 'Snyk',
+        //                     snykTokenId: 'snyk-token',
+        //                     additionalArguments: '',
+        //                     failOnIssues: true,
+        //                     projectName: gitRepoName,
+        //                 )
+        //             }
         //         }
         //     }
         // }
-
-        stage('Snyk Scan') {
-            steps {
-                script {
-                    // Get the Git repository name dynamically
-                    def gitRepoName = sh(script: 'basename `git rev-parse --show-toplevel`', returnStdout: true).trim()
-
-                    // Set Snyk API token as 'snykTokenId' for the duration of this stage
-                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
-                        env.SNYK_TOKEN = snykApiToken
-
-                        // Authenticate Snyk
-                        sh "/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux auth"
-
-                        // Run Snyk scan with --all-projects argument
-                        sh "/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux test --json --severity-threshold=low --all-projects"
-
-                        // Use Snyk Jenkins plugin to scan the project
-                        snykSecurity(
-                            snykInstallation: 'Snyk',
-                            snykTokenId: 'snyk-token',
-                            additionalArguments: '',
-                            failOnIssues: true,
-                            projectName: gitRepoName,
-                        )
-                    }
-                }
-            }
-        }
 
         
 
