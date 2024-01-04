@@ -84,27 +84,25 @@ pipeline {
             steps {
                 echo "Workspace Path: ${WORKSPACE}"
                 echo "Running Checkov Scan"
-                catchError(buildResult: 'SUCCESS') {
-                    script {
-                        // Run Checkov scan and capture the output, skipping tf.json
-                        def checkovOutput = sh(script: 'checkov -d . --quiet --compact --skip-check tf.json', returnStdout: true).trim()
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    // Run Checkov scan and capture the output, skipping tf.json
+                    def checkovOutput = sh(script: 'checkov -d . --quiet --compact --skip-check tf.json', returnStdout: true).trim()
 
-                        // Check for failed entries in the output
-                        def failedChecks = checkovOutput.contains('FAILED for resource:')
+                    // Check for failed entries in the output
+                    def failedChecks = checkovOutput.contains('FAILED for resource:')
 
-                        // Change the color of the stage based on the presence of failed entries
-                        if (failedChecks) {
-                            currentBuild.result = 'UNSTABLE'
-                        }
+                    // Print the output to the Jenkins console
+                    echo "Checkov Scan Output:"
+                    echo checkovOutput
 
-                        // Print the output to the Jenkins console
-                        echo "Checkov Scan Output:"
-                        echo checkovOutput
-                        echo "Failed Checks: ${failedChecks}"
+                    // Throw an error if failedChecks is true
+                    if (failedChecks) {
+                        error 'Checkov scan found failed entries'
                     }
                 }
             }
         }
+
 
 
         stage('Terraform Plan') {
