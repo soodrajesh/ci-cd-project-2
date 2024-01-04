@@ -85,25 +85,29 @@ pipeline {
             echo 'Building...'
         }
         }
+        
         stage('Snyk Test') {
             steps {
                 echo 'Testing...'
                 script {
-                    // Authenticate with Snyk
-                    sh '/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux auth'
+                    // Set Snyk API token as an environment variable
+                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
+                        env.SNYK_TOKEN = env.SNYK_API_TOKEN
 
-                    // Print current working directory and list files for debugging
-                    sh 'pwd'
-                    sh 'ls -al'
+                        // Print current working directory and list files for debugging
+                        sh 'pwd'
+                        sh 'ls -al'
 
-                    // Find all .tf files and store them in a variable
-                    def terraformFiles = sh(script: 'find . -name "*.tf"', returnStdout: true).trim()
+                        // Find all .tf files and store them in a variable
+                        def terraformFiles = sh(script: 'find . -name "*.tf"', returnStdout: true).trim()
 
-                    // Run Snyk security testing with explicit target file(s) filter
-                    sh "/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux test --json --severity-threshold=low --file=${terraformFiles}"
+                        // Run Snyk security testing with explicit target file(s) filter
+                        sh "/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux test --json --severity-threshold=low --file=${terraformFiles}"
+                    }
                 }
             }
         }
+
 
 
 
