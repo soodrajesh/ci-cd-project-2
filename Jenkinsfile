@@ -84,10 +84,19 @@ pipeline {
         stage('Snyk Security Scan') {
             steps {
                 withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
-                    sh "snyk test --all-projects --org=your-organisation --severity-threshold=high --json --api-token=${SNYK_API_TOKEN}"
+                    script {
+                        def snykCmd = "snyk test --all-projects --org=your-organisation --severity-threshold=high --json --api-token=${SNYK_API_TOKEN}"
+
+                        // Print the command to the console for debugging
+                        echo "Running Snyk command: ${snykCmd}"
+
+                        // Run the Snyk command
+                        sh snykCmd
+                    }
                 }
             }
         }
+
 
         stage('SonarQube Analysis') {
             steps {
