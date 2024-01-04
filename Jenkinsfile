@@ -100,6 +100,7 @@ pipeline {
                         // Print the output to the Jenkins console
                         echo "Checkov Scan Output:"
                         echo checkovOutput
+                        echo "Failed Checks: ${failedChecks}"
                     }
                 }
             }
