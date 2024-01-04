@@ -86,15 +86,30 @@ pipeline {
         }
         }
         stage('Snyk Test') {
-        steps {
-            echo 'Testing...'
-            snykSecurity(
-            snykInstallation: 'Snyk',
-            snykTokenId: 'snyk-token',
-            // place other parameters here
-            )
+            steps {
+                script {
+                    echo 'Testing...'
+
+                    // Get the current workspace directory
+                    def workspaceDir = pwd()
+
+                    // Run Snyk security testing in the project directory
+                    dir(workspaceDir) {
+                        // Print current working directory and list files for debugging
+                        sh 'pwd'
+                        sh 'ls -al'
+
+                        // Run Snyk security testing
+                        snykSecurity(
+                            snykInstallation: 'Snyk',
+                            snykTokenId: 'snyk-token',
+                            // place other parameters here
+                        )
+                    }
+                }
+            }
         }
-        }
+
         stage('Deploy') {
         steps {
             echo 'Deploying...'
