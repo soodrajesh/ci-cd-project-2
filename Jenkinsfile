@@ -96,11 +96,22 @@ pipeline {
                 }
             }
         }
-        stage('Deploy') {
+
+        stage('Snyk Test') {
             steps {
-                echo 'Deploying...'
+                script {
+                    // Retrieve Snyk API token from Jenkins credentials
+                    def snykApiToken = credentials('snyk-token')
+                    
+                    // Run Snyk scan with the retrieved API token
+                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
+                        sh "npx snyk test --json --token=${snykApiToken}"
+                        // Add other parameters here
+                    }
+                }
             }
         }
+    
 
 
 
