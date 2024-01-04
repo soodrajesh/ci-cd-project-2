@@ -31,6 +31,31 @@ pipeline {
             }
         }
 
+        stage('Snyk Security Scan') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
+                        // Install Snyk CLI (if not installed globally)
+                        sh 'npm install -g snyk'
+
+                        // Authenticate with Snyk using the token
+                        sh "snyk auth ${SNYK_TOKEN}"
+
+                        // Run Snyk scan
+                        sh "snyk test --project-name=${env.JOB_NAME} --json > snyk-report.json"
+
+                        // Display the content of the Snyk report
+                        echo "Snyk Scan Report:"
+                        sh 'cat snyk-report.json'
+
+                        // Fail the build if vulnerabilities are found (adjust threshold as needed)
+                        sh "snyk test --severity-threshold=high,medium"
+                    }
+                }
+            }
+        }
+
+       
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_TOKEN')]) {
@@ -91,6 +116,20 @@ pipeline {
 
                     // Set the Terraform workspace
                     sh "terraform workspace select ${terraformWorkspace}"
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_TOKEN')]) {
+                    script {
+                        // Define SonarQube properties
+                        def sonarProps = "-Dsonar.projectKey=Demo -Dsonar.login=${SONAR_TOKEN}"
+
+                        // Run SonarQube analysis
+                        sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner ${sonarProps}"
+                    }
                 }
             }
         }
