@@ -99,21 +99,14 @@ pipeline {
 
         stage('Snyk Test') {
             steps {
-                script {
-                    // Retrieve Snyk API token from Jenkins credentials
-                    def snykTokenId = credentials('snyk-token')
-                    
-                    // Run Snyk scan with the retrieved API token
-                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
-                        sh "npx snyk test --json --token=${snykTokenId}"
-                        // Add other parameters here
-                    }
+                echo 'Testing Snyk...'
+                withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
+                    snykSecurity snykInstallation: 'Snyk'
+                    // Add other parameters here
                 }
             }
         }
     
-
-
 
         stage('SonarQube Analysis') {
             steps {
