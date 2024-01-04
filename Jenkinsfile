@@ -89,6 +89,9 @@ pipeline {
             steps {
                 echo 'Testing...'
                 script {
+                    // Authenticate with Snyk
+                    sh '/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux auth'
+
                     // Print current working directory and list files for debugging
                     sh 'pwd'
                     sh 'ls -al'
@@ -101,6 +104,7 @@ pipeline {
                 }
             }
         }
+
 
 
         stage('Deploy') {
