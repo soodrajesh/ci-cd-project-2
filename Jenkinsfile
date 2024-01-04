@@ -103,7 +103,7 @@ pipeline {
                         snykSecurity(
                             snykInstallation: 'Snyk',
                             snykTokenId: 'snyk-token',
-                            targetFile: '**/*.tf', // Specify the pattern for .tf files
+                            targetFile: '*.tf', // Specify the pattern for .tf files
                             // place other parameters here
                         )
                     }
