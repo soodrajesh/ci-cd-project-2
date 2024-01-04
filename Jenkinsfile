@@ -82,9 +82,7 @@ pipeline {
 
         stage('Checkov Scan') {
             steps {
-                echo "Workspace Path: ${WORKSPACE}"
-                echo "Running Checkov Scan"
-                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                script {
                     // Run Checkov scan and capture the output, skipping tf.json
                     def checkovOutput = sh(script: 'checkov -d . --quiet --compact --skip-check tf.json', returnStdout: true).trim()
 
@@ -102,6 +100,11 @@ pipeline {
                 }
             }
         }
+    }
+    options {
+        preserveStashes()
+        timestamps()
+    }
 
 
 
