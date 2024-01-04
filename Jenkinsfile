@@ -91,7 +91,7 @@ pipeline {
         stage('Scan') {
             steps {
                 script {
-                    snykSecurity organisation: 'soodrajesh', projectName: 'ci-cd-project-2', severity: 'medium', snykInstallation: 'Snyk', snykTokenId: '7f4eb460-59be-451c-a835-2bcca89ef9f5', targetFile: ''
+                    snykSecurity organisation: 'soodrajesh', projectName: 'ci-cd-project-2', severity: 'medium', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: ''
                 }
             }
         }
