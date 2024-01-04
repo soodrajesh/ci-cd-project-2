@@ -80,13 +80,13 @@ pipeline {
         }
 
 
-        stage('Install') {
-            steps {
-                script {
-                    sh 'npm install' // Dependency Installation stage
-                }
-            }
-        }
+        // stage('Install') {
+        //     steps {
+        //         script {
+        //             sh 'npm install' // Dependency Installation stage
+        //         }
+        //     }
+        // }
 
         stage('Scan') {
             steps {
