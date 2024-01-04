@@ -80,35 +80,38 @@ pipeline {
         }
 
 
-        // stage('Install') {
-        //     steps {
-        //         script {
-        //             sh 'npm install' // Dependency Installation stage
-        //         }
-        //     }
-        // }
-
-        stage('Scan') {
+        stage('Snyk Security Scan') {
+            environment {
+                SNYK_HOME = tool 'Snyk'
+            }
             steps {
-                script {
-                    snykSecurity organisation: 'soodrajesh', projectName: 'ci-cd-project-2', severity: 'medium', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '*.tf'
+                withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
+                    sh "${SNYK_HOME}/snyk test --all-projects --json"
                 }
             }
         }
 
-        stage('Build') {
-            steps {
-                echo "Build"
-                // Add your build commands here
-            }
-        }
+        // stage('Scan') {
+        //     steps {
+        //         script {
+        //             snykSecurity organisation: 'soodrajesh', projectName: 'ci-cd-project-2', severity: 'medium', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '*.tf'
+        //         }
+        //     }
+        // }
 
-        stage('Results') {
-            steps {
-                echo "Test Result"
-                // Add any post-build actions or result reporting here
-            }
-        }
+        // stage('Build') {
+        //     steps {
+        //         echo "Build"
+        //         // Add your build commands here
+        //     }
+        // }
+
+        // stage('Results') {
+        //     steps {
+        //         echo "Test Result"
+        //         // Add any post-build actions or result reporting here
+        //     }
+        // }
         
 
         // stage('Snyk Scan') {
