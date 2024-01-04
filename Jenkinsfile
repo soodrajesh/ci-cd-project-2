@@ -10,7 +10,6 @@ pipeline {
         PROD_TF_WORKSPACE = 'production'
         SLACK_CHANNEL = 'jenkins-alerts'
         SONARQUBE_SCANNER_HOME = tool 'SonarQube'
-        SNYK_TOKEN = credentials('snyk-token')
     }
 
     stages {
@@ -80,53 +79,6 @@ pipeline {
             }
         }
 
-        stage('Authenticate Snyk') {
-            steps {
-                script {
-                    sh 'snyk auth ${SNYK_TOKEN}'
-                }
-            }
-        }
-
-        stage('Snyk Security Scan') {
-            steps {
-                script {
-                    sh "snyk test --all-projects --json"
-                }
-            }
-        } 
-
-        // stage('Snyk Security Scan') {
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: 'snyk', usernameVariable: 'SNYK_USERNAME', passwordVariable: 'SNYK_API_TOKEN')]) {
-        //             sh "snyk test --all-projects --json"
-        //         }
-        //     }
-        // }
-
-
-        // stage('Scan') {
-        //     steps {
-        //         script {
-        //             snykSecurity organisation: 'soodrajesh', projectName: 'ci-cd-project-2', severity: 'medium', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '*.tf'
-        //         }
-        //     }
-        // }
-
-        // stage('Build') {
-        //     steps {
-        //         echo "Build"
-        //         // Add your build commands here
-        //     }
-        // }
-
-        // stage('Results') {
-        //     steps {
-        //         echo "Test Result"
-        //         // Add any post-build actions or result reporting here
-        //     }
-        // }
-        
 
         // stage('Snyk Scan') {
         //     steps {
@@ -134,24 +86,49 @@ pipeline {
         //             // Get the Git repository name dynamically
         //             def gitRepoName = sh(script: 'basename `git rev-parse --show-toplevel`', returnStdout: true).trim()
 
-
-        //                 // Run Snyk scan with --all-projects argument
-        //                 sh "snyk auth $snykTokenId"
-        //                 sh "snyk test || true"
-        //                 sh "snyk code test"
-
-        //                 // Use Snyk Jenkins plugin to scan the project
-        //                 snykSecurity(
-        //                     snykInstallation: 'Snyk',
-        //                     snykTokenId: 'snyk-token',
-        //                     additionalArguments: '',
-        //                     failOnIssues: true,
-        //                     projectName: gitRepoName,
-        //                 )
-        //             }
+        //             // Use Snyk Jenkins plugin to scan the project
+        //             snykSecurity(
+        //                 snykInstallation: 'Snyk',
+        //                 snykTokenId: 'snyk-token',
+        //                 additionalArguments: '',
+        //                 failOnIssues: true,
+        //                 projectName: gitRepoName,
+        //             )
         //         }
         //     }
         // }
+
+        stage('Snyk Scan') {
+            steps {
+                script {
+                    // Get the Git repository name dynamically
+                    def gitRepoName = sh(script: 'basename `git rev-parse --show-toplevel`', returnStdout: true).trim()
+
+                    // Retrieve Snyk API token from Jenkins credentials using the credential ID
+                    def snykApiToken = credentials('snyk-token')
+
+                    // Set Snyk API token as 'snykTokenId' for the duration of this stage
+                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
+                        env.SNYK_TOKEN = snykApiToken
+
+                        // Authenticate Snyk
+                        sh "/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux auth"
+
+                        // Run Snyk scan with --all-projects argument
+                        sh "/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux test --json --severity-threshold=low --all-projects"
+
+                        // Use Snyk Jenkins plugin to scan the project
+                        snykSecurity(
+                            snykInstallation: 'Snyk',
+                            snykTokenId: 'snyk-token',
+                            additionalArguments: '',
+                            failOnIssues: true,
+                            projectName: gitRepoName,
+                        )
+                    }
+                }
+            }
+        }
 
         
 
