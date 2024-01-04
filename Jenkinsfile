@@ -34,14 +34,19 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
+                    // Retrieve SonarQube token from Jenkins credential
+                    def sonarToken = credentials('SonarQube')
+
                     // Define SonarQube properties
-                    def sonarProps = "-Dsonar.projectKey=Demo" // Replace 'your_project_key' with your actual project key
+                    def sonarProps = "-Dsonar.projectKey=Demo -Dsonar.login=${sonarToken}"
 
                     // Run SonarQube analysis
                     sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner ${sonarProps}"
                 }
             }
         }
+
+
 
 
         stage('Terraform Init') {
