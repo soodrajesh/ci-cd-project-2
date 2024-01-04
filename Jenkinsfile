@@ -83,8 +83,9 @@ pipeline {
         stage('Checkov Scan') {
             steps {
                 script {
+                    sh 'rm -rf *tf.json' 
                     // Run Checkov scan and capture the output, skipping tf.json
-                    def checkovOutput = sh(script: 'checkov -d . --quiet --compact --skip-check tf.json', returnStdout: true).trim()
+                    def checkovOutput = sh(script: 'checkov -d . --quiet --compact --skip-check ', returnStdout: true).trim()
 
                     // Check for failed entries in the output
                     def failedChecks = checkovOutput.contains('FAILED for resource:')
