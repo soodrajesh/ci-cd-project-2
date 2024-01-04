@@ -9,6 +9,7 @@ pipeline {
         DEV_TF_WORKSPACE = 'development'
         PROD_TF_WORKSPACE = 'production'
         SLACK_CHANNEL = 'jenkins-alerts'
+        SONARQUBE_SCANNER_HOME = tool 'SonarQube'
     }
 
     stages {
@@ -29,6 +30,17 @@ pipeline {
                 }
             }
         }
+
+        stage('SonarQube Analysis') {
+                    steps {
+                        script {
+                            withSonarQubeEnv('SonarQube') {
+                                // Run SonarQube analysis
+                                sh "${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner"
+                            }
+                        }
+                    }
+                }
 
         stage('Terraform Init') {
             steps {
