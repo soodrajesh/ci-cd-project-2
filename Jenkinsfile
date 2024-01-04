@@ -88,11 +88,12 @@ pipeline {
 
                     // Use Snyk Jenkins plugin to scan the project
                     snykSecurity(
+                        snykInstallation: 'Snyk',
+                        snykTokenId: 'snyk-token',
                         additionalArguments: '',
                         failOnIssues: true,
                         projectName: gitRepoName,
-                        targetFile: '**/*.tf',
-                        // Add other parameters as needed
+                        targetFile: '**/*.tf'
                     )
                 }
             }
