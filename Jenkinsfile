@@ -100,13 +100,6 @@ pipeline {
                 }
             }
         }
-    }
-    options {
-        preserveStashes()
-        timestamps()
-    }
-
-
 
         stage('Terraform Plan') {
             steps {
