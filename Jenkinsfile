@@ -91,7 +91,7 @@ pipeline {
             }
         }
 
-        stage('Snyk Test') {
+        stage('Snyk Scan') {
             steps {
                 echo 'Running Snyk...'
                 withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
