@@ -94,13 +94,17 @@ pipeline {
         stage('Snyk Scan') {
             steps {
                 echo 'Running Snyk...'
+                // Retrieve Snyk API token from Jenkins credentials using the credential ID
+                def snykApiToken = credentials('snyk-token')
+                
+                // Set Snyk API token as 'snykTokenId' for the duration of this stage
                 withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
+                    env.SNYK_TOKEN = snykApiToken
                     snykSecurity snykInstallation: 'Snyk'
                     // Add other parameters here
                 }
             }
         }
-    
 
         stage('SonarQube Analysis') {
             steps {
