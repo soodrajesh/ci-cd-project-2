@@ -99,7 +99,15 @@ pipeline {
 
         stage('Snyk Test') {
             steps {
-                echo 'Testing Snyk...'
+                echo 'Testing...'
+                snykSecurity snykInstallation: 'Snyk'
+                // Add other parameters here
+            }
+        }
+
+        stage('Snyk Test') {
+            steps {
+                echo 'Running Snyk...'
                 withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
                     snykSecurity snykInstallation: 'Snyk'
                     // Add other parameters here
