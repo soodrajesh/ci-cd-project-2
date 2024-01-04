@@ -79,15 +79,6 @@ pipeline {
             }
         }
 
-        stage('Snyk Test') {
-            steps {
-                echo 'Testing...'
-                script {
-                    // Your Snyk test steps here
-                }
-            }
-        }
-
         stage('Snyk Scan') {
             steps {
                 echo 'Running Snyk...'
@@ -98,12 +89,17 @@ pipeline {
                     // Set Snyk API token as 'snykTokenId' for the duration of this stage
                     withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
                         env.SNYK_TOKEN = snykApiToken
-                        // Your Snyk scan steps here
+
+                        // Run Snyk scan
+                        sh '''
+                            snyk config set api=$SNYK_API_TOKEN
+                            snyk test
+                        '''
                     }
                 }
             }
         }
-    
+
 
 
         stage('SonarQube Analysis') {
