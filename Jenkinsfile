@@ -104,6 +104,9 @@ pipeline {
                     // Get the Git repository name dynamically
                     def gitRepoName = sh(script: 'basename `git rev-parse --show-toplevel`', returnStdout: true).trim()
 
+                        // Authenticate Snyk
+                        sh "/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux auth"
+
                         // Run Snyk scan with --all-projects argument
                         sh "/var/lib/jenkins/tools/io.snyk.jenkins.tools.SnykInstallation/Snyk/snyk-linux test --json --severity-threshold=low --all-projects"
 
@@ -119,6 +122,7 @@ pipeline {
                 }
             }
         
+
 
 
         stage('Deploy') {
