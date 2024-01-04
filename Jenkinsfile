@@ -32,15 +32,17 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-                    steps {
-                        script {
-                            withSonarQubeEnv('SonarQube') {
-                                // Run SonarQube analysis
-                                sh "${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner"
-                            }
-                        }
-                    }
+            steps {
+                script {
+                    // Define SonarQube properties
+                    def sonarProps = "-Dsonar.projectKey=Demo" // Replace 'your_project_key' with your actual project key
+
+                    // Run SonarQube analysis
+                    sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner ${sonarProps}"
                 }
+            }
+        }
+
 
         stage('Terraform Init') {
             steps {
