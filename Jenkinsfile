@@ -79,13 +79,13 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                echo 'Testing...'
-                snykSecurity snykInstallation: 'Snyk'
-                // Add other parameters here
-            }
-        }
+        // stage('Test') {
+        //     steps {
+        //         echo 'Testing...'
+        //         snykSecurity snykInstallation: 'Snyk'
+        //         // Add other parameters here
+        //     }
+        // }
 
 
         stage('Snyk Scan') {
@@ -93,12 +93,16 @@ pipeline {
                 echo 'Running Snyk...'
                 script {
                     // Retrieve Snyk API token from Jenkins credentials using the credential ID
-                    def snykApiToken = credentials('snyk-token')
+                    def snykApiTokenCredential = credentials('snyk-token')
+
+                    // Ensure the credential type is 'Snyk API token'
+                    if (!(snykApiTokenCredential instanceof org.jenkinsci.plugins.plaincredentials.StringCredentials)) {
+                        error "Credentials 'snyk-token' must be of type 'Snyk API token'"
+                    }
 
                     // Set Snyk API token as 'snykTokenId' for the duration of this stage
                     withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
-                        env.SNYK_TOKEN = snykApiToken
-
+                        env.SNYK_TOKEN = snykApiTokenCredential.secret
                         // Run Snyk scan
                         sh '''
                             snyk config set api=$SNYK_API_TOKEN
@@ -108,6 +112,7 @@ pipeline {
                 }
             }
         }
+
 
 
 
