@@ -10,6 +10,7 @@ pipeline {
         PROD_TF_WORKSPACE = 'production'
         SLACK_CHANNEL = 'jenkins-alerts'
         SONARQUBE_SCANNER_HOME = tool 'SonarQube'
+        SNYK_TOKEN = credentials('snyk-token')
     }
 
     stages {
@@ -82,19 +83,26 @@ pipeline {
         stage('Authenticate Snyk') {
             steps {
                 script {
-                    sh 'snyk auth'
+                    sh 'snyk auth ${SNYK_TOKEN}'
                 }
             }
         }
-
 
         stage('Snyk Security Scan') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'snyk', usernameVariable: 'SNYK_USERNAME', passwordVariable: 'SNYK_API_TOKEN')]) {
+                script {
                     sh "snyk test --all-projects --json"
                 }
             }
-        }
+        } 
+
+        // stage('Snyk Security Scan') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: 'snyk', usernameVariable: 'SNYK_USERNAME', passwordVariable: 'SNYK_API_TOKEN')]) {
+        //             sh "snyk test --all-projects --json"
+        //         }
+        //     }
+        // }
 
 
         // stage('Scan') {
