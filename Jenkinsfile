@@ -101,11 +101,11 @@ pipeline {
             steps {
                 script {
                     // Retrieve Snyk API token from Jenkins credentials
-                    def snykApiToken = credentials('snyk-token')
+                    def snykTokenId = credentials('snyk-token')
                     
                     // Run Snyk scan with the retrieved API token
                     withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_API_TOKEN')]) {
-                        sh "npx snyk test --json --token=${snykApiToken}"
+                        sh "npx snyk test --json --token=${snykTokenId}"
                         // Add other parameters here
                     }
                 }
