@@ -124,7 +124,7 @@ pipeline {
                         -o './'
                         -s './'
                         -f 'ALL' 
-                        --prettyPrint''', odcInstallation: 'OWASP'
+                        --prettyPrint''', odcInstallation:'OWASP'
 
                     // Archive the generated report
                     archiveArtifacts artifacts: 'dependency-check-report.html', fingerprint: true
