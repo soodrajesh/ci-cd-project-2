@@ -119,7 +119,7 @@ pipeline {
             }
         }
 
-        stage('Publish HTML Report') {
+        stage('Publish OWASP HTML Report') {
             steps {
                 script {
                     publishHTML([
