@@ -130,8 +130,12 @@ pipeline {
                     reportFiles: 'dependency-check-report.html',
                     reportName: 'OWASP Dependency-Check Report'
                 ])
+                
+                // Display a direct link to the HTML report on the Jenkins console
+                html 'Link to OWASP Dependency-Check Report: <a href="${BUILD_URL}artifact/dependency-check-report.html">dependency-check-report.html</a>'
             }
         }
+
 
 
 
