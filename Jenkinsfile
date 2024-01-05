@@ -118,10 +118,18 @@ pipeline {
                 archiveArtifacts artifacts: '**/dependency-check-report.xml', fingerprint: true
 
                 // Publish Dependency-Check HTML report
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml', htmlReport: true
+                publishHTML(target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: '.',
+                    reportFiles: 'dependency-check-report.html',
+                    reportName: 'OWASP Dependency-Check Report'
+                ])
             }
         }
     
+
 
         // stage('OWASP DP SCAN') {
         //     steps {
