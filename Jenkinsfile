@@ -251,7 +251,7 @@ pipeline {
                     }
 
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCredentialsId, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                        sh 'terraform apply -auto-approve tfplan -lock=false'    
+                        sh 'terraform apply -auto-approve -lock=false tfplan'    
                     }
 
                     // Notify Slack about the successful apply
