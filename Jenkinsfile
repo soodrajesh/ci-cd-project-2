@@ -97,17 +97,53 @@ pipeline {
         //     }
         // }
 
-        stage('OWASP Dependency-Check Vulnerabilities') {
-      steps {
-        dependencyCheck additionalArguments: ''' 
-                    -o './'
-                    -s './'
-                    -f 'ALL' 
-                    --prettyPrint''', odcInstallation: 'OWASP'
+    //     stage('OWASP Dependency-Check Vulnerabilities') {
+    //   steps {
+    //     dependencyCheck additionalArguments: ''' 
+    //                 -o './'
+    //                 -s './'
+    //                 -f 'ALL' 
+    //                 --prettyPrint''', odcInstallation: 'OWASP'
         
-        dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-      }
-    }
+    //     dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+    //   }
+    // }
+
+
+        stage('OWASP Dependency-Check Vulnerabilities') {
+            steps {
+                script {
+                    // Determine the current working directory
+                    def currentDir = sh(script: 'pwd', returnStdout: true).trim()
+
+                    // Run Dependency-Check scan
+                    def dependencyCheckResult = dependencyCheck additionalArguments: '''
+                        -o './'
+                        -s './'
+                        -f 'ALL' 
+                        --prettyPrint''', odcInstallation: 'OWASP'
+
+                    // Archive the generated report
+                    archiveArtifacts artifacts: 'dependency-check-report.html', fingerprint: true
+
+                    // Fail the build if vulnerabilities are found (customize this condition)
+                    if (dependencyCheckResult > 0) {
+                        error 'OWASP Dependency-Check found vulnerabilities.'
+                    }
+
+                    // Publish Dependency-Check HTML report
+                    publishHTML(target: [
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: currentDir,
+                        reportFiles: 'dependency-check-report.html',
+                        reportName: 'OWASP Dependency-Check Report'
+                    ])
+                }
+            }
+        }
+
 
         stage('SonarQube Analysis') {
             steps {
