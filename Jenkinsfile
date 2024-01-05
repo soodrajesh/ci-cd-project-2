@@ -134,7 +134,6 @@ pipeline {
             }
         }
 
-
         // stage('OWASP DP SCAN') {
         //     steps {
         //         dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'OWASP'
