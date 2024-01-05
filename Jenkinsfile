@@ -121,18 +121,19 @@ pipeline {
 
         stage('Publish HTML Report') {
             steps {
-                // Publish Dependency-Check HTML report
-                publishHTML(target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: false,
-                    keepAll: true,
-                    reportDir: '.',
-                    reportFiles: 'dependency-check-report.html',
-                    reportName: 'OWASP Dependency-Check Report'
-                ])
-                
+                script {
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: '.',
+                        reportFiles: 'dependency-check-report.html',
+                        reportName: 'OWASP Dependency-Check Report'
+                    ])
+                }
             }
         }
+
 
 
         // stage('OWASP DP SCAN') {
@@ -294,11 +295,6 @@ pipeline {
 
 post {
     always {
-        script {
-            def buildUrl = env.BUILD_URL
-            def reportUrl = "${buildUrl}artifact/dependency-check-report.html"
-            echo "OWASP Dependency-Check Report: ${reportUrl}"
-        }
         // Notification for every build completion
         slackSend(
             color: '#36a64f',
