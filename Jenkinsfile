@@ -111,10 +111,24 @@ pipeline {
 
         stage('OWASP DP SCAN') {
             steps {
+                // Run Dependency-Check scan
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'OWASP'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+
+                // Archive the generated report
+                archiveArtifacts artifacts: '**/dependency-check-report.xml', fingerprint: true
+
+                // Publish Dependency-Check HTML report
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml', htmlReport: true
             }
         }
+    
+
+        // stage('OWASP DP SCAN') {
+        //     steps {
+        //         dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'OWASP'
+        //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+        //     }
+        // }
 
         // stage('OWASP Dependency-Check') {
         //             steps {
@@ -183,16 +197,18 @@ pipeline {
                         // Specify the directory to scan (replace 'src' with your directory)
                         def scanDirectory = "${WORKSPACE}"
 
+                        // Specify the file patterns to include (e.g., '*.tf' for Terraform files)
+                        def filePatterns = "**/*.tf"
+
                         // Log the directory being scanned
                         echo "Scanning directory: ${scanDirectory}"
 
                         // Run SonarQube analysis
-                        sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner -Dsonar.sources=${scanDirectory} ${sonarProps}"
+                        sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner -Dsonar.sources=${scanDirectory} -Dsonar.inclusions=${filePatterns} ${sonarProps}"
                     }
                 }
             }
         }
-
 
 
         stage('Checkov Scan') {
