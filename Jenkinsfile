@@ -110,38 +110,43 @@ pipeline {
     // }
 
 
-        stage('OWASP Dependency-Check Vulnerabilities') {
-            steps {
-                script {
+        stage('OWASP Dependency-Check') {
+                    steps {
+                        script {
+                            // Run Dependency-Check scan with minimal configuration
+                            def dependencyCheckResult = dependencyCheck additionalArguments: '''
+                                -s './'
+                                -f 'ALL' 
+                                --prettyPrint''', odcInstallation: 'OWASP'
 
-                    // Run Dependency-Check scan
-                    def dependencyCheckResult = dependencyCheck additionalArguments: '''
-                        -o './'
-                        -s './'
-                        -f 'ALL' 
-                        --prettyPrint''', odcInstallation:'OWASP'
+                            // Archive the generated report
+                            archiveArtifacts artifacts: 'dependency-check-report.html', fingerprint: true
 
-                    // Archive the generated report
-                    archiveArtifacts artifacts: 'dependency-check-report.html', fingerprint: true
+                            // Display a message indicating success
+                            echo 'OWASP Dependency-Check scan completed.'
 
-                    // Fail the build if vulnerabilities are found (customize this condition)
-                    if (dependencyCheckResult > 0) {
-                        error 'OWASP Dependency-Check found vulnerabilities.'
+                            // Fail the build if vulnerabilities are found (customize this condition)
+                            if (dependencyCheckResult > 0) {
+                                error 'OWASP Dependency-Check found vulnerabilities.'
+                            }
+                        }
                     }
-
-                    // Publish Dependency-Check HTML report
-                    publishHTML(target: [
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: false,
-                        keepAll: true,
-                        reportDir: '.',
-                        reportFiles: 'dependency-check-report.html',
-                        reportName: 'OWASP Dependency-Check Report'
-                    ])
                 }
+
+        stage('View OWASP Report') {
+            steps {
+                // Publish Dependency-Check HTML report
+                publishHTML(target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: '.',
+                    reportFiles: 'dependency-check-report.html',
+                    reportName: 'OWASP Dependency-Check Report'
+                ])
             }
         }
-
+  
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_TOKEN')]) {
