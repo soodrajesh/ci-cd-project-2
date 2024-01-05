@@ -178,7 +178,7 @@ pipeline {
                         def scanDirectory = "${WORKSPACE}"
 
                         // Specify the file patterns to include (e.g., '*.tf' for Terraform files)
-                        //def filePatterns = "**/*.tf"
+                        def filePatterns = "**/*.tf"
 
                         // Log the directory being scanned
                         echo "Scanning directory: ${scanDirectory}"
