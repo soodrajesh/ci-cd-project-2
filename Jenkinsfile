@@ -9,6 +9,8 @@ pipeline {
         DEV_TF_WORKSPACE = 'development'
         PROD_TF_WORKSPACE = 'production'
         SLACK_CHANNEL = 'jenkins-alerts'
+        SONARQUBE_SCANNER_HOME = tool 'SonarQube'
+        SNYK_TOKEN = credentials('snyk-token-soodrajesh')
     }
 
     stages {
@@ -19,15 +21,12 @@ pipeline {
             }
         }
 
-        stage('Setup Python Virtual Environment') {
+        stage('Install Checkov') {
             steps {
                 script {
-                    // Create and activate virtual environment
-                    sh 'python3.7 -m venv myenv'
-                    sh 'source myenv/bin/activate'
-                    
-                    // Install Checkov in the virtual environment
-                    sh 'pip install checkov'
+                    sh "pip3 install checkov"
+                    def checkovPath = sh(script: 'pip show checkov | grep "Location" | cut -d " " -f 2', returnStdout: true).trim()
+                    env.PATH = "${checkovPath}:${env.PATH}"
                 }
             }
         }
@@ -81,24 +80,181 @@ pipeline {
             }
         }
 
-        stage('Terraform Plan') {
+
+        // stage('Authenticate Snyk') {
+        //     steps {
+        //         script {
+        //             sh 'snyk auth ${SNYK_TOKEN}'
+        //         }
+        //     }
+        // }
+
+        // stage('Snyk Security Scan') {
+        //     steps {
+        //         script {
+        //             sh "snyk iac test --experimental --all-projects"
+        //         }
+        //     }
+        // }
+
+    //     stage('OWASP Dependency-Check Vulnerabilities') {
+    //   steps {
+    //     dependencyCheck additionalArguments: ''' 
+    //                 -o './'
+    //                 -s './'
+    //                 -f 'ALL' 
+    //                 --prettyPrint''', odcInstallation: 'OWASP'
+        
+    //     dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+    //   }
+    // }
+
+        stage('OWASP DP SCAN') {
+            steps {
+                // Run Dependency-Check scan
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'OWASP'
+
+                // Archive the generated report
+                archiveArtifacts artifacts: '**/dependency-check-report.html', fingerprint: true
+            }
+        }
+
+        stage('Publish HTML Report') {
             steps {
                 script {
-                    // Additional steps if needed
-                    sh 'terraform plan -out=tfplan'
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: '.',
+                        reportFiles: 'dependency-check-report.html',
+                        reportName: 'OWASP Dependency-Check Report'
+                    ])
                 }
             }
         }
+
+
+
+        // stage('OWASP DP SCAN') {
+        //     steps {
+        //         dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'OWASP'
+        //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+        //     }
+        // }
+
+        // stage('OWASP Dependency-Check') {
+        //             steps {
+        //                 script {
+        //                     // Run Dependency-Check scan with minimal configuration
+        //                     def dependencyCheckResult = dependencyCheck additionalArguments: '''
+        //                         -s './'
+        //                         -f 'ALL' 
+        //                         --prettyPrint''', odcInstallation: 'OWASP'
+
+        //                     // Archive the generated report
+        //                     archiveArtifacts artifacts: 'dependency-check-report.html', fingerprint: true
+
+        //                     // Display a message indicating success
+        //                     echo 'OWASP Dependency-Check scan completed.'
+                            
+        //                     // Log the number of vulnerabilities found
+        //                     echo "Number of vulnerabilities found: ${dependencyCheckResult}"
+
+        //                     // Do not fail the build even if vulnerabilities are found
+        //                     echo 'Continuing with the build regardless of vulnerabilities.'
+                            
+        //                     // // Fail the build if vulnerabilities are found (customize this condition)
+        //                     // if (dependencyCheckResult > 0) {
+        //                     //     error 'OWASP Dependency-Check found vulnerabilities.'
+        //                     }
+        //                 }
+        //             }
+                
+
+        // stage('View OWASP Report') {
+        //     steps {
+        //         // Publish Dependency-Check HTML report
+        //         publishHTML(target: [
+        //             allowMissing: false,
+        //             alwaysLinkToLastBuild: false,
+        //             keepAll: true,
+        //             reportDir: '.',
+        //             reportFiles: 'dependency-check-report.html',
+        //             reportName: 'OWASP Dependency-Check Report'
+        //         ])
+        //     }
+        // }
+  
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_TOKEN')]) {
+        //             script {
+        //                 // Define SonarQube properties
+        //                 def sonarProps = "-Dsonar.projectKey=Demo -Dsonar.login=${SONAR_TOKEN}"
+
+        //                 // Run SonarQube analysis
+        //                 sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner ${sonarProps}"
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_TOKEN')]) {
+                    script {
+                        // Define SonarQube properties
+                        def sonarProps = "-Dsonar.projectKey=Demo -Dsonar.login=${SONAR_TOKEN}"
+
+                        // Specify the directory to scan (replace 'src' with your directory)
+                        def scanDirectory = "${WORKSPACE}"
+
+                        // Specify the file patterns to include (e.g., '*.tf' for Terraform files)
+                        def filePatterns = "**/*.tf"
+
+                        // Log the directory being scanned
+                        echo "Scanning directory: ${scanDirectory}"
+
+                        // Run SonarQube analysis
+                        sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner -Dsonar.sources=${scanDirectory} -Dsonar.inclusions=${filePatterns} ${sonarProps}"
+                    }
+                }
+            }
+        }
+
 
         stage('Checkov Scan') {
             steps {
                 script {
-                    // Run Checkov with the skip-check option from a file
-                    sh 'checkov -d /path/to/your/code --skip-check $(< skip_checks.txt)'
+                    sh 'rm -rf *tf.json' 
+                    // Run Checkov scan and capture the output, skipping tf.json
+                    def checkovOutput = sh(script: 'checkov -d . --compact --skip-check $(< skip_checks.txt) ', returnStdout: true).trim()
+
+                    // Check for failed entries in the output
+                    def failedChecks = checkovOutput.contains('FAILED for resource:')
+
+                    // Print the output to the Jenkins console
+                    echo "Checkov Scan Output:"
+                    echo checkovOutput
+
+                    // Throw an error if failedChecks is true
+                    if (failedChecks) {
+                        error 'Checkov scan found failed entries'
+                    }
                 }
             }
         }
 
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    // Additional steps if needed
+                    sh 'terraform plan -out=tfplan -lock=false'
+                }
+            }
+        }
+ 
         stage('Manual Approval') {
             steps {
                 script {
@@ -122,7 +278,7 @@ pipeline {
                     }
 
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCredentialsId, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                        sh 'terraform apply -auto-approve tfplan'    
+                        sh 'terraform apply -auto-approve -lock=false tfplan'    
                     }
 
                     // Notify Slack about the successful apply
@@ -131,51 +287,52 @@ pipeline {
                         message: "Terraform apply successful on branch ${env.BRANCH_NAME}",
                         channel: SLACK_CHANNEL
                     )
+
                 }
             }
         }
     }
 
-    post {
-        always {
-            // Notification for every build completion
-            slackSend(
-                color: '#36a64f',
-                message: "Jenkins build ${env.JOB_NAME} ${env.BUILD_NUMBER} completed.\nPipeline URL: ${env.BUILD_URL}",
-                channel: SLACK_CHANNEL
-            )
-            slackSend(
-                color: '#36a64f',
-                message: "GitHub build completed.\nPipeline URL: ${env.BUILD_URL}",
-                channel: SLACK_CHANNEL
-            )
-        }
-
-        failure {
-            // Notification for build failure
-            slackSend(
-                color: '#FF0000',
-                message: "Jenkins build ${env.JOB_NAME} ${env.BUILD_NUMBER} failed.\nPipeline URL: ${env.BUILD_URL}",
-                channel: SLACK_CHANNEL
-            )
-        }
-
-        unstable {
-            // Notification for unstable build
-            slackSend(
-                color: '#FFA500',
-                message: "Jenkins build ${env.JOB_NAME} ${env.BUILD_NUMBER} is unstable.\nPipeline URL: ${env.BUILD_URL}",
-                channel: SLACK_CHANNEL
-            )
-        }
-
-        aborted {
-            // Notification for aborted build
-            slackSend(
-                color: '#FFFF00',
-                message: "Jenkins build ${env.JOB_NAME} ${env.BUILD_NUMBER} aborted.\nPipeline URL: ${env.BUILD_URL}",
-                channel: SLACK_CHANNEL
-            )
-        }
+post {
+    always {
+        // Notification for every build completion
+        slackSend(
+            color: '#36a64f',
+            message: "Jenkins build ${env.JOB_NAME} ${env.BUILD_NUMBER} completed.\nPipeline URL: ${env.BUILD_URL}",
+            channel: SLACK_CHANNEL
+        )
+        slackSend(
+            color: '#36a64f',
+            message: "GitHub build completed.\nPipeline URL: ${env.BUILD_URL}",
+            channel: SLACK_CHANNEL
+        )
     }
+
+    failure {
+        // Notification for build failure
+        slackSend(
+            color: '#FF0000',
+            message: "Jenkins build ${env.JOB_NAME} ${env.BUILD_NUMBER} failed.\nPipeline URL: ${env.BUILD_URL}",
+            channel: SLACK_CHANNEL
+        )
+    }
+
+    unstable {
+        // Notification for unstable build
+        slackSend(
+            color: '#FFA500',
+            message: "Jenkins build ${env.JOB_NAME} ${env.BUILD_NUMBER} is unstable.\nPipeline URL: ${env.BUILD_URL}",
+            channel: SLACK_CHANNEL
+        )
+    }
+
+    aborted {
+        // Notification for aborted build
+        slackSend(
+            color: '#FFFF00',
+            message: "Jenkins build ${env.JOB_NAME} ${env.BUILD_NUMBER} aborted.\nPipeline URL: ${env.BUILD_URL}",
+            channel: SLACK_CHANNEL
+        )
+    }
+  }
 }
