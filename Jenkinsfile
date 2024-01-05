@@ -119,8 +119,8 @@ pipeline {
             }
         }
 
-        post {
-            always {
+        stage('Publish HTML Report') {
+            steps {
                 // Publish Dependency-Check HTML report
                 publishHTML(target: [
                     allowMissing: false,
@@ -132,6 +132,7 @@ pipeline {
                 ])
             }
         }
+
 
 
     
