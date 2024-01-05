@@ -113,8 +113,11 @@ pipeline {
         stage('OWASP Dependency-Check Vulnerabilities') {
             steps {
                 script {
-                    // Determine the current working directory
-                    def currentDir = sh(script: 'pwd', returnStdout: true).trim()
+                    // Determine the installation directory
+                    def odcInstallationDir = tool name: 'OWASP', type: 'org.jenkinsci.plugins.DependencyCheck.DependencyCheckInstallation'
+
+                    // Remove the lock file if it exists
+                    sh "rm -f ${odcInstallationDir}/data/odc.update.lock"
 
                     // Run Dependency-Check scan
                     def dependencyCheckResult = dependencyCheck additionalArguments: '''
@@ -136,14 +139,13 @@ pipeline {
                         allowMissing: false,
                         alwaysLinkToLastBuild: false,
                         keepAll: true,
-                        reportDir: currentDir,
+                        reportDir: '.',
                         reportFiles: 'dependency-check-report.html',
                         reportName: 'OWASP Dependency-Check Report'
                     ])
                 }
             }
         }
-
 
         stage('SonarQube Analysis') {
             steps {
