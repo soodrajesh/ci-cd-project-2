@@ -116,7 +116,11 @@ pipeline {
 
                 // Archive the generated report
                 archiveArtifacts artifacts: '**/dependency-check-report.html', fingerprint: true
+            }
+        }
 
+        post {
+            always {
                 // Publish Dependency-Check HTML report
                 publishHTML(target: [
                     allowMissing: false,
@@ -128,6 +132,7 @@ pipeline {
                 ])
             }
         }
+
 
     
 
