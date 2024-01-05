@@ -183,18 +183,16 @@ pipeline {
                         // Specify the directory to scan (replace 'src' with your directory)
                         def scanDirectory = "${WORKSPACE}"
 
-                        // Specify the file patterns to include (e.g., '*.tf' for Terraform files)
-                        def filePatterns = "**/*.tf"
-
                         // Log the directory being scanned
                         echo "Scanning directory: ${scanDirectory}"
 
                         // Run SonarQube analysis
-                        sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner -Dsonar.sources=${scanDirectory} -Dsonar.inclusions=${filePatterns} ${sonarProps}"
+                        sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner -Dsonar.sources=${scanDirectory} ${sonarProps}"
                     }
                 }
             }
         }
+
 
 
         stage('Checkov Scan') {
