@@ -113,9 +113,6 @@ pipeline {
         stage('OWASP Dependency-Check Vulnerabilities') {
             steps {
                 script {
-                    // Determine the installation directory
-                    def odcInstallationDir = tool name: 'OWASP', type: 'org.jenkinsci.plugins.DependencyCheck.DependencyCheckInstallation'
-
                     // Remove the lock file if it exists
                     sh "rm -f ${odcInstallationDir}/data/odc.update.lock"
 
