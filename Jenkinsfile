@@ -131,15 +131,8 @@ pipeline {
                     reportName: 'OWASP Dependency-Check Report'
                 ])
                 
-                // Display a direct link to the HTML report on the Jenkins console
-                html 'Link to OWASP Dependency-Check Report: <a href="${BUILD_URL}artifact/dependency-check-report.html">dependency-check-report.html</a>'
             }
         }
-
-
-
-
-    
 
 
         // stage('OWASP DP SCAN') {
@@ -301,6 +294,11 @@ pipeline {
 
 post {
     always {
+        script {
+            def buildUrl = env.BUILD_URL
+            def reportUrl = "${buildUrl}artifact/dependency-check-report.html"
+            echo "OWASP Dependency-Check Report: ${reportUrl}"
+        }
         // Notification for every build completion
         slackSend(
             color: '#36a64f',
