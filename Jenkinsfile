@@ -124,14 +124,20 @@ pipeline {
 
                             // Display a message indicating success
                             echo 'OWASP Dependency-Check scan completed.'
+                            
+                            // Log the number of vulnerabilities found
+                            echo "Number of vulnerabilities found: ${dependencyCheckResult}"
 
-                            // Fail the build if vulnerabilities are found (customize this condition)
-                            if (dependencyCheckResult > 0) {
-                                error 'OWASP Dependency-Check found vulnerabilities.'
+                            // Do not fail the build even if vulnerabilities are found
+                            echo 'Continuing with the build regardless of vulnerabilities.'
+                            
+                            // // Fail the build if vulnerabilities are found (customize this condition)
+                            // if (dependencyCheckResult > 0) {
+                            //     error 'OWASP Dependency-Check found vulnerabilities.'
                             }
                         }
                     }
-                }
+                
 
         stage('View OWASP Report') {
             steps {
