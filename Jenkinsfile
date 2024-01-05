@@ -81,21 +81,33 @@ pipeline {
         }
 
 
-        stage('Authenticate Snyk') {
-            steps {
-                script {
-                    sh 'snyk auth ${SNYK_TOKEN}'
-                }
-            }
-        }
+        // stage('Authenticate Snyk') {
+        //     steps {
+        //         script {
+        //             sh 'snyk auth ${SNYK_TOKEN}'
+        //         }
+        //     }
+        // }
 
-        stage('Snyk Security Scan') {
-            steps {
-                script {
-                    sh "snyk test --all-projects --json"
-                }
-            }
-        }
+        // stage('Snyk Security Scan') {
+        //     steps {
+        //         script {
+        //             sh "snyk iac test --experimental --all-projects"
+        //         }
+        //     }
+        // }
+
+        stage('OWASP Dependency-Check Vulnerabilities') {
+      steps {
+        dependencyCheck additionalArguments: ''' 
+                    -o './'
+                    -s './'
+                    -f 'ALL' 
+                    --prettyPrint''', odcInstallation: 'OWASP Dependency-Check Vulnerabilities'
+        
+        dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+      }
+    }
 
         stage('SonarQube Analysis') {
             steps {
