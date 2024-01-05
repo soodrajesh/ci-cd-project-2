@@ -153,6 +153,20 @@ pipeline {
             }
         }
   
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_TOKEN')]) {
+        //             script {
+        //                 // Define SonarQube properties
+        //                 def sonarProps = "-Dsonar.projectKey=Demo -Dsonar.login=${SONAR_TOKEN}"
+
+        //                 // Run SonarQube analysis
+        //                 sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner ${sonarProps}"
+        //             }
+        //         }
+        //     }
+        // }
+
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_TOKEN')]) {
@@ -160,8 +174,17 @@ pipeline {
                         // Define SonarQube properties
                         def sonarProps = "-Dsonar.projectKey=Demo -Dsonar.login=${SONAR_TOKEN}"
 
+                        // Specify the directory to scan (replace 'src' with your directory)
+                        def scanDirectory = "${WORKSPACE}"
+
+                        // Specify the file patterns to include (e.g., '*.tf' for Terraform files)
+                        //def filePatterns = "**/*.tf"
+
+                        // Log the directory being scanned
+                        echo "Scanning directory: ${scanDirectory}"
+
                         // Run SonarQube analysis
-                        sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner ${sonarProps}"
+                        sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner -Dsonar.sources=${scanDirectory} -Dsonar.inclusions=${filePatterns} ${sonarProps}"
                     }
                 }
             }
