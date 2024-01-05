@@ -115,7 +115,7 @@ pipeline {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'OWASP'
 
                 // Archive the generated report
-                archiveArtifacts artifacts: '**/dependency-check-report.xml', fingerprint: true
+                archiveArtifacts artifacts: '**/dependency-check-report.html', fingerprint: true
 
                 // Publish Dependency-Check HTML report
                 publishHTML(target: [
@@ -128,6 +128,7 @@ pipeline {
                 ])
             }
         }
+
     
 
 
