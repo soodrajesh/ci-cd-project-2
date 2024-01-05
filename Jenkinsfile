@@ -109,49 +109,55 @@ pipeline {
     //   }
     // }
 
-
-        stage('OWASP Dependency-Check') {
-                    steps {
-                        script {
-                            // Run Dependency-Check scan with minimal configuration
-                            def dependencyCheckResult = dependencyCheck additionalArguments: '''
-                                -s './'
-                                -f 'ALL' 
-                                --prettyPrint''', odcInstallation: 'OWASP'
-
-                            // Archive the generated report
-                            archiveArtifacts artifacts: 'dependency-check-report.html', fingerprint: true
-
-                            // Display a message indicating success
-                            echo 'OWASP Dependency-Check scan completed.'
-                            
-                            // Log the number of vulnerabilities found
-                            echo "Number of vulnerabilities found: ${dependencyCheckResult}"
-
-                            // Do not fail the build even if vulnerabilities are found
-                            echo 'Continuing with the build regardless of vulnerabilities.'
-                            
-                            // // Fail the build if vulnerabilities are found (customize this condition)
-                            // if (dependencyCheckResult > 0) {
-                            //     error 'OWASP Dependency-Check found vulnerabilities.'
-                            }
-                        }
-                    }
-                
-
-        stage('View OWASP Report') {
+        stage('OWASP DP SCAN') {
             steps {
-                // Publish Dependency-Check HTML report
-                publishHTML(target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: false,
-                    keepAll: true,
-                    reportDir: '.',
-                    reportFiles: 'dependency-check-report.html',
-                    reportName: 'OWASP Dependency-Check Report'
-                ])
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'owasp-dp-check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
+
+        // stage('OWASP Dependency-Check') {
+        //             steps {
+        //                 script {
+        //                     // Run Dependency-Check scan with minimal configuration
+        //                     def dependencyCheckResult = dependencyCheck additionalArguments: '''
+        //                         -s './'
+        //                         -f 'ALL' 
+        //                         --prettyPrint''', odcInstallation: 'OWASP'
+
+        //                     // Archive the generated report
+        //                     archiveArtifacts artifacts: 'dependency-check-report.html', fingerprint: true
+
+        //                     // Display a message indicating success
+        //                     echo 'OWASP Dependency-Check scan completed.'
+                            
+        //                     // Log the number of vulnerabilities found
+        //                     echo "Number of vulnerabilities found: ${dependencyCheckResult}"
+
+        //                     // Do not fail the build even if vulnerabilities are found
+        //                     echo 'Continuing with the build regardless of vulnerabilities.'
+                            
+        //                     // // Fail the build if vulnerabilities are found (customize this condition)
+        //                     // if (dependencyCheckResult > 0) {
+        //                     //     error 'OWASP Dependency-Check found vulnerabilities.'
+        //                     }
+        //                 }
+        //             }
+                
+
+        // stage('View OWASP Report') {
+        //     steps {
+        //         // Publish Dependency-Check HTML report
+        //         publishHTML(target: [
+        //             allowMissing: false,
+        //             alwaysLinkToLastBuild: false,
+        //             keepAll: true,
+        //             reportDir: '.',
+        //             reportFiles: 'dependency-check-report.html',
+        //             reportName: 'OWASP Dependency-Check Report'
+        //         ])
+        //     }
+        // }
   
         // stage('SonarQube Analysis') {
         //     steps {
