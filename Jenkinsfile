@@ -115,7 +115,7 @@ pipeline {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'OWASP'
 
                 // Archive the generated report
-                archiveArtifacts artifacts: '**/dependency-check-report.html', fingerprint: true
+                archiveArtifacts artifacts: '${WORKSPACE}/dependency-check-report.html', fingerprint: true, onlyIfSuccessful: true
             }
         }
 
@@ -133,8 +133,6 @@ pipeline {
                 }
             }
         }
-
-
 
         // stage('OWASP DP SCAN') {
         //     steps {
