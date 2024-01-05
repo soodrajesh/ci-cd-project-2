@@ -113,8 +113,6 @@ pipeline {
         stage('OWASP Dependency-Check Vulnerabilities') {
             steps {
                 script {
-                    // Remove the lock file if it exists
-                    sh "rm -f ${odcInstallationDir}/data/odc.update.lock"
 
                     // Run Dependency-Check scan
                     def dependencyCheckResult = dependencyCheck additionalArguments: '''
